@@ -1,7 +1,8 @@
 //cleanify, rank top songs, all time, time listened
 const express = require('express');
+const path = require('path');
 const app = express();
-const port = 3000;
+const port = 8080;
 
 app.get('/', (req, res) => {
   res.send('Hello World!!!!');
@@ -53,16 +54,3 @@ const getUserTopTracks = async (accessToken) => {
       console.error('Failed to fetch top tracks:', error);
   }
 };
-import React from 'react';
-import TopTracks from './toptracks';  // Make sure the path matches the location of your new component file
-
-function App() {
-  return (
-    <div>
-      <h1>Welcome to My Spotify App</h1>
-      <TopTracks />
-    </div>
-  );
-}
-
-export default App;
