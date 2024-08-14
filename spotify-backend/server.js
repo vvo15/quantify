@@ -51,36 +51,41 @@ app.get('/callback', async (req, res) => {
         res.redirect(`/#${querystring.stringify({ access_token: accessToken, refresh_token: refreshToken })}`);
     } catch (error) {
         console.error('Failed to retrieve access token', error);
-        res.redirect('/#' + querystring.stringify({ error: 'invalid_token' }));
+        res.status(error.response ? error.response.status : 500).json({ error: "Failed to authenticate" });
     }
 });
 
 // Use the access token to access the Spotify Web API for top tracks
-app.get('https://api.spotify.com/v1/me/top/tracks', async (req, res) => {
+app.get('/api/top-tracks', async (req, res) => {
     const accessToken = req.query.access_token;
+    if (!accessToken) {
+        res.status(401).json({ error: 'Access Token Required' });
+        return;
+    }
+
     try {
-        const response = await axios.get('https://api.spotify.com/v1/me/top/tracks', {
+        const topTracksUrl = 'https://api.spotify.com/v1/me/top/tracks';
+        const response = await axios.get(topTracksUrl, {
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
         res.json(response.data);
     } catch (error) {
         console.error('Failed to fetch top tracks:', error);
-        res.status(500).send(error.message);
+        res.status(error.response ? error.response.status : 500).json({ error: "Failed to fetch top tracks" });
     }
 });
 
 // Fallback to serve the React app's index.html for any other requests
 app.get('*', (req, res) => {
     const indexPath = path.join(buildPath, 'index.html');
-    res.sendFile(indexPath, function (err) {
+    res.sendFile(indexPath, (err) => {
         if (err) {
             console.error("Error sending index.html:", err);
-            res.status(500).send(err.message);
+            res.status(500).send("Failed to serve application");
         }
     });
 });
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
-    console.log(error.response || error.message);
 });
