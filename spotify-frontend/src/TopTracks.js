@@ -11,9 +11,6 @@ function TopTracks() {
             .join('');
     };
 
-    const codeVerifier = generateRandomString(128);
-    localStorage.setItem('code_verifier', codeVerifier);
-
     const createCodeChallenge = async (codeVerifier) => {
         const encoder = new TextEncoder();
         const data = encoder.encode(codeVerifier);
@@ -26,41 +23,67 @@ function TopTracks() {
 
     useEffect(() => {
         const handleAuthFlow = async () => {
-            const challenge = await createCodeChallenge(codeVerifier);
+            console.log('handleAuthFlow triggered.');
 
-            if (!window.location.search.includes('code')) {
-                const authUrl = `http://localhost:8080/login?code_challenge=${challenge}`;
-                window.location.href = authUrl;
-            } else {
-                const urlParams = new URLSearchParams(window.location.search);
-                const code = urlParams.get('code');
-                const storedCodeVerifier = localStorage.getItem('code_verifier');
+            // Get the authorization code from the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const storedCodeVerifier = localStorage.getItem('code_verifier');
 
-                if (!code || !storedCodeVerifier) {
-                    console.error('Missing code or code_verifier in frontend');
-                    return;
+            console.log('Authorization code from URL:', code);
+            console.log('Stored code verifier:', storedCodeVerifier);
+
+            if (code && storedCodeVerifier) {
+                // Send the code and code_verifier to the backend
+                console.log('Sending code and code_verifier to backend...');
+                try {
+                    const response = await fetch('http://localhost:8080/callback', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code, code_verifier: storedCodeVerifier }),
+                    });
+
+                    const data = await response.json();
+                    console.log('Response from backend:', data);
+
+                    if (data.access_token) {
+                        console.log('Access token received:', data.access_token);
+                        fetchTopTracks(data.access_token);
+
+                        // Clear query parameters to prevent looping
+                        window.history.replaceState({}, document.title, '/');
+                    } else {
+                        console.error('Failed to retrieve access token:', data.error);
+                    }
+                } catch (error) {
+                    console.error('Error during token exchange:', error);
                 }
+            } else {
+                console.log('No authorization code found. Starting login flow...');
 
-                const response = await fetch('http://localhost:8080/callback', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code, code_verifier: storedCodeVerifier }),
-                });
+                // Start the login flow
+                const codeVerifier = generateRandomString(128);
+                localStorage.setItem('code_verifier', codeVerifier);
 
-                const data = await response.json();
+                try {
+                    const codeChallenge = await createCodeChallenge(codeVerifier);
+                    console.log('Generated code challenge:', codeChallenge);
 
-                if (data.access_token) {
-                    fetchTopTracks(data.access_token);
-                } else {
-                    console.error('Failed to retrieve access token');
+                    const authUrl = `http://localhost:8080/login?code_challenge=${codeChallenge}`;
+                    console.log('Redirecting to Spotify with URL:', authUrl);
+                    window.location.href = authUrl;
+                } catch (error) {
+                    console.error('Error creating code challenge:', error);
                 }
             }
         };
 
         const fetchTopTracks = async (accessToken) => {
+            console.log('Fetching top tracks with access token...');
             try {
                 const response = await fetch(`http://localhost:8080/api/top-tracks?access_token=${accessToken}`);
                 const data = await response.json();
+                console.log('Top tracks fetched:', data);
                 setTracks(data.items || []);
             } catch (error) {
                 console.error('Error fetching top tracks:', error);
