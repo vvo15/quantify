@@ -4,21 +4,22 @@ const path = require('path');
 const axios = require('axios');
 const querystring = require('querystring');
 const dotenv = require('dotenv');
-// Load environment variables from .env
+
+// Load environment variables
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 8080;
 
-// Allow cross-origin requests
+// Middleware
 app.use(cors());
-
-// Parse JSON request bodies
 app.use(express.json());
 
-// Serve static files from the React app's build directory
-const buildPath = path.join(__dirname, '../spotify-frontend/build');
-app.use(express.static(buildPath));
+// Debug middleware to log incoming requests
+app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
+    next();
+});
 
 // Redirect to Spotify's authorization URL
 app.get('/login', (req, res) => {
@@ -27,36 +28,53 @@ app.get('/login', (req, res) => {
         response_type: 'code',
         client_id: process.env.SPOTIFY_CLIENT_ID,
         redirect_uri: process.env.REDIRECT_URI,
-        scope: scope,
+        scope,
         code_challenge_method: 'S256',
-        code_challenge: req.query.code_challenge, // Passed from frontend
+        code_challenge: req.query.code_challenge,
     })}`;
+
+    console.log('Authorization URL:', authUrl);
     res.redirect(authUrl);
 });
-console.log("print ln 36");
 
-// Handle Spotify callback and exchange code for tokens
+// Handle Spotify redirect (GET /callback)
+app.get('/callback', (req, res) => {
+    const code = req.query.code;
+
+    if (!code) {
+        return res.status(400).send('Authorization code is missing.');
+    }
+
+    console.log('Authorization code received in GET /callback:', code);
+
+    // Redirect to frontend with the authorization code
+    res.redirect(`http://localhost:3000/?code=${code}`);
+});
+
+// Exchange code for tokens (POST /callback)
 app.post('/callback', async (req, res) => {
     const { code, code_verifier } = req.body;
 
     if (!code || !code_verifier) {
-        return res.status(400).send('Missing code or code_verifier.');
+        console.error('Missing code or code_verifier');
+        return res.status(400).json({ error: 'Missing code or code_verifier' });
     }
 
-    console.log('Exchanging authorization code for tokens...');
+    console.log('Received authorization code in POST /callback:', code);
+
     try {
         const response = await axios.post(
             'https://accounts.spotify.com/api/token',
             querystring.stringify({
                 grant_type: 'authorization_code',
-                code: code,
+                code,
                 redirect_uri: process.env.REDIRECT_URI,
-                code_verifier: code_verifier,
+                code_verifier,
             }),
             {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': `Basic ${Buffer.from(
+                    Authorization: `Basic ${Buffer.from(
                         `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
                     ).toString('base64')}`,
                 },
@@ -64,18 +82,17 @@ app.post('/callback', async (req, res) => {
         );
 
         const { access_token, refresh_token } = response.data;
+        console.log('Access Token:', access_token);
 
-        // Redirect to frontend with tokens
+        // Respond with tokens
         res.json({ access_token, refresh_token });
-        console.log("print ln 70");
-
     } catch (error) {
-        console.error('Error exchanging authorization code:', error.response.data || error.message);
-        res.status(500).json({ error: 'Authentication failed' });
+        console.error('Error exchanging authorization code:', error.response?.data || error.message);
+        res.status(500).json({ error: 'Failed to exchange authorization code' });
     }
 });
 
-// API route to fetch top tracks using the access token
+// Fetch top tracks (GET /api/top-tracks)
 app.get('/api/top-tracks', async (req, res) => {
     const accessToken = req.query.access_token;
 
@@ -88,24 +105,13 @@ app.get('/api/top-tracks', async (req, res) => {
             headers: { Authorization: `Bearer ${accessToken}` },
         });
         res.json(response.data);
-        console.log(res.json(response.data));
     } catch (error) {
-        console.error('Error fetching top tracks:', error);
+        console.error('Error fetching top tracks:', error.response?.data || error.message);
         res.status(500).json({ error: 'Failed to fetch top tracks' });
     }
 });
 
-// Serve the React app for all other routes
-app.get('*', (req, res) => {
-    res.sendFile(path.join(buildPath, 'index.html'), (err) => {
-        if (err) {
-            console.error('Error serving index.html:', err);
-            res.status(500).send('Failed to load application');
-        }
-    });
-});
-
-// Start the server
+// Start server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
