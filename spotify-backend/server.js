@@ -61,7 +61,9 @@ app.post('/callback', async (req, res) => {
     }
 
     console.log('Received authorization code in POST /callback:', code);
-
+    console.log('Code Verifier in POST /callback:', code_verifier);
+    console.log('Redirect URI:', process.env.REDIRECT_URI);
+    
     try {
         const response = await axios.post(
             'https://accounts.spotify.com/api/token',
