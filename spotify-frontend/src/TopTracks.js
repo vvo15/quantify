@@ -96,6 +96,7 @@ function TopTracks() {
     return (
         <div>
             <h1>Your Top Tracks</h1>
+            <h2>6 Months</h2>
             <ul>
                 {tracks.map((track) => (
                     <li key={track.id}>
