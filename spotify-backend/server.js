@@ -113,6 +113,26 @@ app.get('/api/top-tracks', async (req, res) => {
     }
 });
 
+// Fetch profile picture and name
+app.get('/api/me', async (req, res) => {
+    const accessToken = req.query.access_token;
+    if (!accessToken) {
+      return res.status(401).json({ error: 'Access Token Required' });
+    }
+  
+    try {
+      const response = await axios.get('https://api.spotify.com/v1/me', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      res.json(response.data); // The user profile
+    } catch (error) {
+      console.error('Error fetching user profile:', error.response?.data || error.message);
+      res.status(500).json({ error: 'Failed to fetch user profile' });
+    }
+  });
+  
 // Start server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
