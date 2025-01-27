@@ -40,7 +40,7 @@ function ProfileDetails() {
       <p
         style={{
           margin: 0,
-          fontSize: '20px',
+          fontSize: '50px',
         }}
       >
         Welcome,
@@ -60,7 +60,8 @@ function ProfileDetails() {
             src={profile.images[0].url}
             alt="Profile"
             style={{
-              width: '80px',
+              marginLeft: '-150px',
+              width: '150px',
               borderRadius: '50%',
             }}
           />
