@@ -1,3 +1,4 @@
+// ProfileDetails.js
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from './AuthContext';
 
@@ -31,32 +32,29 @@ function ProfileDetails() {
     <div
       style={{
         display: 'flex',
-        flexDirection: 'column', // column to place "Welcome," above row
+        flexDirection: 'column',
         alignItems: 'center',
-        marginTop: '5px', // Slightly reduced space above
+        marginTop: '30px', // move 30px down
       }}
     >
-      {/* Larger "Welcome," */}
       <p
         style={{
           margin: 0,
-          fontSize: '20px', // Make "Welcome," bigger
+          fontSize: '20px',
         }}
       >
         Welcome,
       </p>
 
-      {/* Row with the profile pic on the left, name on the right */}
       <div
         style={{
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          gap: '14px', // space between pic & name
+          gap: '14px',
           marginTop: '5px',
         }}
       >
-        {/* Profile Picture */}
         {profile.images && profile.images.length > 0 && (
           <img
             src={profile.images[0].url}
@@ -67,8 +65,6 @@ function ProfileDetails() {
             }}
           />
         )}
-
-        {/* User's Name */}
         <h2
           style={{
             margin: 0,

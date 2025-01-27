@@ -1,21 +1,20 @@
+// App.js
 import React from 'react';
 import { AuthProvider } from './AuthContext';
 import TopTracks from './TopTracks';
+import ProfileDetails from './ProfileDetails';
 import logo from './download.png';
 import './App.css';
-import ProfileDetails from './ProfileDetails';
 
 function App() {
   return (
     <AuthProvider>
       <div
-        className="App"
         style={{
-          // Use Spotify-like font
           fontFamily: 'Circular, Helvetica, Arial, sans-serif',
         }}
       >
-        {/* Header / Logo and Title (restored to previous left-aligned position) */}
+        {/* Logo + Title (left-aligned at marginLeft: 230px) */}
         <h1
           style={{
             fontSize: '22px',
@@ -23,7 +22,7 @@ function App() {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            marginLeft: '230px',
+            marginLeft: '-100px',
             marginTop: '20px',
             marginBottom: '10px',
           }}
@@ -38,16 +37,14 @@ function App() {
           Quantify
         </h1>
 
-        {/* Profile Details (centered within its own container) */}
+        {/* Welcome, user */}
         <ProfileDetails />
 
-        {/* Subheader / Tagline 
-            - Removed extra margin so it appears closer to the profile details
-        */}
+        {/* Tagline (centered, no extra gap) */}
         <header
           className="App-header"
           style={{
-            marginTop: '0px', // Eliminate gap between ProfileDetails & tagline
+            marginTop: '0px',
             textAlign: 'center',
           }}
         >
@@ -61,7 +58,7 @@ function App() {
           </h2>
         </header>
 
-        {/* Top Tracks (centered in its container) */}
+        {/* Single TopTracks component with a dropdown to toggle time range */}
         <TopTracks />
       </div>
     </AuthProvider>
