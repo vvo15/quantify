@@ -1,4 +1,3 @@
-// AuthContext.js
 import React, { createContext, useState, useEffect } from 'react';
 
 export const AuthContext = createContext();
@@ -41,7 +40,6 @@ export function AuthProvider({ children }) {
           const data = await response.json();
           if (data.access_token) {
             setAccessToken(data.access_token);
-            // remove ?code= from URL
             window.history.replaceState({}, document.title, '/');
           } else {
             console.error('Failed to retrieve access token:', data.error);

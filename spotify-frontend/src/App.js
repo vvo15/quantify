@@ -1,4 +1,3 @@
-// App.js
 import React from 'react';
 import { AuthProvider } from './AuthContext';
 import TopTracks from './TopTracks';
@@ -14,7 +13,7 @@ function App() {
           fontFamily: 'Circular, Helvetica, Arial, sans-serif',
         }}
       >
-        {/* Logo + Title (left-aligned at marginLeft: 230px) */}
+        {}
         <h1
           style={{
             fontSize: '22px',
@@ -37,10 +36,10 @@ function App() {
           Quantify
         </h1>
 
-        {/* Welcome, user */}
+        {}
         <ProfileDetails />
 
-        {/* Tagline (centered, no extra gap) */}
+        {}
         <header
           className="App-header"
           style={{
@@ -58,7 +57,7 @@ function App() {
           </h2>
         </header>
 
-        {/* Single TopTracks component with a dropdown to toggle time range */}
+        {}
         <TopTracks />
       </div>
     </AuthProvider>
