@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -12,13 +11,11 @@ const port = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json());
 
-// Debug logs
 app.use((req, res, next) => {
   console.log(`Incoming request: ${req.method} ${req.url}`);
   next();
 });
 
-// 1. /login -> redirect to Spotify
 app.get('/login', (req, res) => {
   const scope = 'user-read-private user-top-read';
   const authUrl = `https://accounts.spotify.com/authorize?${querystring.stringify({
@@ -33,7 +30,6 @@ app.get('/login', (req, res) => {
   res.redirect(authUrl);
 });
 
-// 2. Spotify redirects to /callback (GET)
 app.get('/callback', (req, res) => {
   const code = req.query.code;
   if (!code) {
@@ -41,11 +37,9 @@ app.get('/callback', (req, res) => {
   }
   console.log('Authorization code in GET /callback:', code);
 
-  // Redirect to frontend with code
   res.redirect(`http://localhost:3000/?code=${code}`);
 });
 
-// 3. Exchange code -> tokens (POST /callback)
 app.post('/callback', async (req, res) => {
   const { code, code_verifier } = req.body;
   if (!code || !code_verifier) {
@@ -81,7 +75,6 @@ app.post('/callback', async (req, res) => {
   }
 });
 
-// 4. /api/top-tracks?time_range=xxx
 app.get('/api/top-tracks', async (req, res) => {
   const accessToken = req.query.access_token;
   const timeRange = req.query.time_range || 'medium_term';
@@ -106,7 +99,6 @@ app.get('/api/top-tracks', async (req, res) => {
   }
 });
 
-// 5. /api/me -> user profile
 app.get('/api/me', async (req, res) => {
   const accessToken = req.query.access_token;
   if (!accessToken) {
