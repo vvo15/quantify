@@ -5,25 +5,20 @@ const axios = require('axios');
 const querystring = require('querystring');
 const dotenv = require('dotenv');
 
-// Load environment variables
 dotenv.config();
 
-// Check if environment variables are loaded
 console.log('Client ID:', process.env.SPOTIFY_CLIENT_ID);
 console.log('Redirect URI:', process.env.REDIRECT_URI);
 
 const app = express();
 const port = process.env.PORT || 8080;
 
-// CORS setup to allow cross-origin requests (adjust for production if needed)
 app.use(cors({ origin: 'http://localhost:8080' }));
 
-// Serve static files from the React app's build directory
 const buildPath = path.join(__dirname, '../spotify-frontend/build');
 console.log('Serving static files from:', buildPath);
 app.use(express.static(buildPath));
 
-// Login route: Redirects user to Spotify for authentication
 app.get('/login', (req, res) => {
     const scope = 'user-read-private user-top-read';
     const authUrl = `https://accounts.spotify.com/authorize?${querystring.stringify({
@@ -35,7 +30,6 @@ app.get('/login', (req, res) => {
     res.redirect(authUrl);
 });
 
-// Callback route: Exchanges authorization code for access and refresh tokens
 app.get('/callback', async (req, res) => {
     const code = req.query.code || null;
 
@@ -66,7 +60,6 @@ app.get('/callback', async (req, res) => {
         console.log('Tokens received:', response.data);
         const { access_token, refresh_token } = response.data;
 
-        // Redirect to frontend with tokens in the hash fragment
         res.redirect(`/#${querystring.stringify({
             access_token,
             refresh_token,
@@ -80,7 +73,6 @@ app.get('/callback', async (req, res) => {
     }
 });
 
-// API route: Fetches the user's top tracks from Spotify
 app.get('/api/top-tracks', async (req, res) => {
     const accessToken = req.query.access_token;
 
@@ -107,7 +99,6 @@ app.get('/api/top-tracks', async (req, res) => {
     }
 });
 
-// Fallback route: Serves the React app's index.html for any unknown route
 app.get('*', (req, res) => {
     const indexPath = path.join(buildPath, 'index.html');
     res.sendFile(indexPath, (err) => {
@@ -118,7 +109,6 @@ app.get('*', (req, res) => {
     });
 });
 
-// Start the server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
