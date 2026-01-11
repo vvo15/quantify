@@ -1,6 +1,6 @@
 import React from 'react';
-import TopTracks from './TopTracks.js';  // Adjust this path if needed
-import logo from './logo.svg';            // Assuming logo.svg is correctly placed in your src folder
+import TopTracks from './TopTracks.js';
+import logo from './logo.svg';
 import './App.css';
 
 function App() {
