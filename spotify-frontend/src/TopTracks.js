@@ -3,14 +3,12 @@ import React, { useState, useEffect } from 'react';
 async function TopTracks() {
     const [tracks, setTracks] = useState([]);
    
-      //authUrl.search = new URLSearchParams(params).toString();
 const clientId = 'f3b6382942394d78b21785da386038c8';
 const redirectUri = 'http://localhost:8080';
 
 const scope = 'user-read-private user-read-email';
 const authUrl = new URL("https://accounts.spotify.com/authorize")
 
-// generated in the previous step\
 const generateRandomString = (length) => {
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const values = crypto.getRandomValues(new Uint8Array(length));
@@ -50,7 +48,6 @@ let code = urlParams.get('code');
 
 const getToken = async code => {
 
-    // stored in the previous step
     let codeVerifier = localStorage.getItem('code_verifier');
   
     const payload = {
@@ -79,7 +76,7 @@ const getToken = async code => {
                 const access_token = localStorage.getItem('access_token');
                 if (!access_token) {
                     console.error('Access token not found');
-                    return; // Exit if no access token
+                    return;
                 }
 
                 const res = await fetch('https://api.spotify.com/${endpoint}', {
